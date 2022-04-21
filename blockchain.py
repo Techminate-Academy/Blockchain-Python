@@ -32,11 +32,15 @@ class Blockchain:
         while check_proof is False:
             #any hard to calculate math operation
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
-            if hash_operation[:4] == '0000':
+            if hash_operation[:2] == '00':
                 check_proof = True
             else:
                 new_proof += 1
-        return new_proof
+        response = {
+                        'new_proof':new_proof, 
+                        'hash_operation':hash_operation
+                    }
+        return response
     
     #hashing data or block
     def hash(self, block):
