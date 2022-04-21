@@ -38,7 +38,7 @@ def mine_block():
     pow = blockchain.proof_of_work(previous_proof)
     proof = pow['new_proof']
     block_hash = pow['hash_operation']
-    previous_hash = blockchain.hash(previous_block)
+    previous_hash = previous_block['block_hash']
     timestamp = str(datetime.datetime.now())
     block = blockchain.create_block(proof, previous_hash, block_hash, timestamp)
     response = {
@@ -46,7 +46,7 @@ def mine_block():
                     'timestamp': block['timestamp'],
                     'proof': block['proof'],
                     'block_hash': block_hash,
-                    'previous_hash': block['previous_hash']
+                    'previous_hash': block['previous_block_hash']
                 }
     return response
 
@@ -56,3 +56,12 @@ async def get_blockchain():
             'length': len(blockchain.chain),
             'blockchain': blockchain.chain
         }
+
+@app.get("/get_chain_validation")
+async def chain_validation():
+    is_valid = blockchain.is_chain_valid(blockchain.chain)
+    if is_valid:
+        response = {'message': 'All good. The Blockchain is valid.'}
+    else:
+        response = {'message': 'Houston, we have a problem. The Blockchain is not valid.'}
+    return response

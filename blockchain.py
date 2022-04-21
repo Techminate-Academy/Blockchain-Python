@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import json
+from time import time
 
 class Blockchain:
 
@@ -8,39 +9,39 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         #genesis block
-        index = 1
-        timestamp =str(datetime.datetime.now())
-        proof = 1
-        previous_hash = 0
-        block = {
-                    'index': index,
-                    'timestamp': timestamp,
-                    'proof': proof,
-                    'previous_hash': previous_hash
-                }
-        encoded_block = json.dumps(block, sort_keys = True).encode()
-        current_hash = hashlib.sha256(encoded_block).hexdigest()
-        genesis_block =  {
-                    'index': index,
-                    'timestamp': timestamp,
-                    'proof': proof,
-                    'block_hash': current_hash,
-                    'previous_hash': previous_hash
-                }
-
-        self.chain.append(genesis_block)
-    
+        self.genesis_block()
     #create block
-    def create_block(self, proof, previous_hash):
+    def create_block(self, proof, previous_hash, block_hash, timestamp):
         block = {
                     'index': len(self.chain) + 1,
-                    'timestamp': str(datetime.datetime.now()),
+                    'timestamp': timestamp,
                     'proof': proof,
-                    'previous_hash': previous_hash
+                    'previous_block_hash': previous_hash,
+                    'block_hash': block_hash
                 }
         self.chain.append(block)
         return block
-        
+
+    #create genesis block
+    def genesis_block(self):
+        index = 1
+        timestamp = str(datetime.datetime.now())
+        proof = 1
+        previous_hash = 0
+        data = {
+                    'index': index,
+                    'timestamp': timestamp,
+                    'proof': proof,
+                    'previous_block_hash': previous_hash
+                }
+        block_hash = self.hash(data)
+        self.create_block(proof = proof, previous_hash = previous_hash, block_hash=block_hash, timestamp=timestamp)
+    
+    #hashing data or block
+    def hash(self, block):
+        encoded_block = json.dumps(block, sort_keys = True).encode()
+        return hashlib.sha256(encoded_block).hexdigest()
+      
     #previous block
     def get_previous_block(self):
         return self.chain[-1]
@@ -52,7 +53,7 @@ class Blockchain:
         while check_proof is False:
             #any hard to calculate math operation
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
-            if hash_operation[:2] == '00':
+            if hash_operation[:5] == '00000':
                 check_proof = True
             else:
                 new_proof += 1
@@ -61,11 +62,6 @@ class Blockchain:
                         'hash_operation':hash_operation
                     }
         return response
-    
-    #hashing data or block
-    def hash(self, block):
-        encoded_block = json.dumps(block, sort_keys = True).encode()
-        return hashlib.sha256(encoded_block).hexdigest()
     
     #validate the chain / block
     def is_chain_valid(self, chain):
@@ -76,7 +72,7 @@ class Blockchain:
             block = chain[block_index]
             
             #check if previous hash of the block is valid
-            if block['previous_hash'] != self.hash(previous_block):
+            if block['previous_block_hash'] != self.hash(previous_block):
                 return False
             
             #check if previous proof is valid
