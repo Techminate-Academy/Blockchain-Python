@@ -8,7 +8,27 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         #genesis block
-        self.create_block(proof = 1, previous_hash = '0')
+        index = 1
+        timestamp =str(datetime.datetime.now())
+        proof = 1
+        previous_hash = 0
+        block = {
+                    'index': index,
+                    'timestamp': timestamp,
+                    'proof': proof,
+                    'previous_hash': previous_hash
+                }
+        encoded_block = json.dumps(block, sort_keys = True).encode()
+        current_hash = hashlib.sha256(encoded_block).hexdigest()
+        genesis_block =  {
+                    'index': index,
+                    'timestamp': timestamp,
+                    'proof': proof,
+                    'block_hash': current_hash,
+                    'previous_hash': previous_hash
+                }
+
+        self.chain.append(genesis_block)
     
     #create block
     def create_block(self, proof, previous_hash):
