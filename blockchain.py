@@ -10,6 +10,7 @@ class Blockchain:
         self.chain = []
         #genesis block
         self.genesis_block()
+    
     #create block
     def create_block(self, proof, previous_hash, block_hash, timestamp):
         block = {
@@ -34,11 +35,11 @@ class Blockchain:
                     'proof': proof,
                     'previous_block_hash': previous_hash
                 }
-        block_hash = self.hash(data)
+        block_hash = self.calculateHash(data)
         self.create_block(proof = proof, previous_hash = previous_hash, block_hash=block_hash, timestamp=timestamp)
     
     #hashing data or block
-    def hash(self, block):
+    def calculateHash(self, block):
         encoded_block = json.dumps(block, sort_keys = True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
       
@@ -53,7 +54,7 @@ class Blockchain:
         while check_proof is False:
             #any hard to calculate math operation
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
-            if hash_operation[:5] == '00000':
+            if hash_operation[:4] == '0000':
                 check_proof = True
             else:
                 new_proof += 1
@@ -69,19 +70,23 @@ class Blockchain:
 
         block_index = 1
         while block_index < len(chain):
-            block = chain[block_index]
+            current_block = chain[block_index]
             
-            #check if previous hash of the block is valid
-            if block['previous_block_hash'] != self.hash(previous_block):
+            #if hash of current block is equal to calculateHash of current block
+            if current_block['block_hash'] != self.calculateHash(current_block):
+                return False
+
+            #if previous hash of current block is equal to hash of previous block
+            if current_block['previous_block_hash'] != self.calculateHash(previous_block):
                 return False
             
             #check if previous proof is valid
             previous_proof = previous_block['proof']
-            proof = block['proof']
+            proof = current_block['proof']
             hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
             if hash_operation[:4] != '0000':
                 return False
             
-            previous_block = block
+            previous_block = current_block
             block_index += 1
         return True
