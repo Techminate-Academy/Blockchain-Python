@@ -23,25 +23,25 @@ class Blockchain:
         self.chain.append(block)
         return block
 
+    #hashing data or block
+    def calculateHash(self, index, previous_hash, timestamp, proof):
+        data = {
+                    'index': index,
+                    'previous_block_hash': previous_hash,
+                    'timestamp': timestamp,
+                    'proof': proof
+                }
+        encoded_block = json.dumps(data, sort_keys = True).encode()
+        return hashlib.sha256(encoded_block).hexdigest()
+
     #create genesis block
     def genesis_block(self):
         index = 1
         timestamp = str(datetime.datetime.now())
         proof = 1
         previous_hash = 0
-        data = {
-                    'index': index,
-                    'timestamp': timestamp,
-                    'proof': proof,
-                    'previous_block_hash': previous_hash
-                }
-        block_hash = self.calculateHash(data)
+        block_hash = self.calculateHash(self, index, previous_hash, timestamp, proof)
         self.create_block(proof = proof, previous_hash = previous_hash, block_hash=block_hash, timestamp=timestamp)
-    
-    #hashing data or block
-    def calculateHash(self, block):
-        encoded_block = json.dumps(block, sort_keys = True).encode()
-        return hashlib.sha256(encoded_block).hexdigest()
       
     #previous block
     def get_previous_block(self):
