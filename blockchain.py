@@ -12,9 +12,9 @@ class Blockchain:
         self.genesis_block()
     
     #create block
-    def create_block(self, proof, previous_hash, block_hash, timestamp):
+    def create_block(self, index, proof, previous_hash, block_hash, timestamp):
         block = {
-                    'index': len(self.chain) + 1,
+                    'index': index,
                     'timestamp': timestamp,
                     'proof': proof,
                     'previous_block_hash': previous_hash,
@@ -40,8 +40,8 @@ class Blockchain:
         timestamp = str(datetime.datetime.now())
         proof = 1
         previous_hash = 0
-        block_hash = self.calculateHash(self, index, previous_hash, timestamp, proof)
-        self.create_block(proof = proof, previous_hash = previous_hash, block_hash=block_hash, timestamp=timestamp)
+        block_hash = self.calculateHash(index, previous_hash, timestamp, proof)
+        self.create_block(index=index, proof = proof, previous_hash = previous_hash, block_hash=block_hash, timestamp=timestamp)
       
     #previous block
     def get_previous_block(self):
@@ -73,11 +73,11 @@ class Blockchain:
             current_block = chain[block_index]
             
             #if hash of current block is equal to calculateHash of current block
-            if current_block['block_hash'] != self.calculateHash(current_block):
+            if current_block['block_hash'] != self.calculateHash(current_block['index'], current_block['previous_block_hash'], current_block['timestamp'], current_block['proof']):
                 return False
 
             #if previous hash of current block is equal to hash of previous block
-            if current_block['previous_block_hash'] != self.calculateHash(previous_block):
+            if current_block['previous_block_hash'] != self.calculateHash(previous_block['index'], previous_block['previous_block_hash'], previous_block['timestamp'], previous_block['proof']):
                 return False
             
             #check if previous proof is valid
@@ -86,7 +86,7 @@ class Blockchain:
             hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
             if hash_operation[:4] != '0000':
                 return False
-            
+
             previous_block = current_block
             block_index += 1
         return True

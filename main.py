@@ -1,3 +1,4 @@
+from wsgiref import validate
 from fastapi import FastAPI
 from blockchain import Blockchain
 import datetime
@@ -34,13 +35,14 @@ async def root():
 @app.get("/mine_block")
 def mine_block():
     previous_block = blockchain.get_previous_block()
+    index = int(previous_block['index']) + 1
     previous_proof = previous_block['proof']
     pow = blockchain.proof_of_work(previous_proof)
     proof = pow['new_proof']
-    block_hash = pow['hash_operation']
     previous_hash = previous_block['block_hash']
     timestamp = str(datetime.datetime.now())
-    block = blockchain.create_block(proof, previous_hash, block_hash, timestamp)
+    block_hash = blockchain.calculateHash(index, previous_hash, timestamp, proof)
+    block = blockchain.create_block(index, proof, previous_hash, block_hash, timestamp)
     response = {
                     'index': block['index'],
                     'timestamp': block['timestamp'],
@@ -59,9 +61,44 @@ async def get_blockchain():
 
 @app.get("/get_chain_validation")
 async def chain_validation():
-    is_valid = blockchain.is_chain_valid(blockchain.chain)
-    if is_valid:
-        response = {'message': 'All good. The Blockchain is valid.'}
-    else:
-        response = {'message': 'Houston, we have a problem. The Blockchain is not valid.'}
-    return response
+    # is_valid = blockchain.is_chain_valid(blockchain.chain)
+    previous_block = blockchain.chain[0]
+
+    block_index = 1
+    while block_index < len(blockchain.chain):
+        current_block = blockchain.chain[block_index]
+        
+        #if hash of current block is equal to calculateHash of current block
+        # validation_1 = {
+        #     'hash' : current_block['block_hash'],
+        #     'calculated_hash' : blockchain.calculateHash(current_block['index'], current_block['previous_block_hash'], current_block['timestamp'], current_block['proof'])
+        # }
+        # return validation_1
+        if current_block['block_hash'] != blockchain.calculateHash(current_block['index'], current_block['previous_block_hash'], current_block['timestamp'], current_block['proof']):
+            return False
+
+        #if previous hash of current block is equal to hash of previous block
+        # validation_2 = {
+        #     'previous_hash' : current_block['previous_block_hash'],
+        #     'calculated_previous_hash' : blockchain.calculateHash(previous_block['index'], previous_block['previous_block_hash'], previous_block['timestamp'], previous_block['proof'])
+        # }
+        if current_block['previous_block_hash'] != blockchain.calculateHash(previous_block['index'], previous_block['previous_block_hash'], previous_block['timestamp'], previous_block['proof']):
+            return False
+
+        #check if previous proof is valid
+        validation_3 = {
+            'previous_hash' : current_block['previous_block_hash'],
+            'calculated_previous_hash' : blockchain.calculateHash(previous_block['index'], previous_block['previous_block_hash'], previous_block['timestamp'], previous_block['proof'])
+        }
+
+        return validation_3
+        previous_proof = previous_block['proof']
+        proof = current_block['proof']
+        hash_operation = hashlib.sha256(str(proof**2 - previous_proof**2).encode()).hexdigest()
+        if hash_operation[:4] != '0000':
+            return False
+
+        previous_block = current_block
+
+        block_index += 1
+   
