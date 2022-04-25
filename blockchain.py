@@ -4,7 +4,6 @@ import json
 from time import time
 
 class Blockchain:
-
     #constructor
     def __init__(self):
         self.chain = []
@@ -90,3 +89,9 @@ class Blockchain:
             previous_block = current_block
             block_index += 1
         return True
+
+    def get_blockchain(self):
+        return  {
+            'length': len(self.chain),
+            'blockchain': self.chain
+        }
