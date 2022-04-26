@@ -7,6 +7,7 @@ class Blockchain:
     #constructor
     def __init__(self):
         self.chain = []
+        self.transactions = []
         #genesis block
         self.genesis_block()
     
@@ -17,8 +18,10 @@ class Blockchain:
                     'timestamp': timestamp,
                     'proof': proof,
                     'previous_block_hash': previous_hash,
-                    'block_hash': block_hash
+                    'block_hash': block_hash,
+                    'transactions': self.transactions
                 }
+        self.transactions = []
         self.chain.append(block)
         return block
 
@@ -90,8 +93,20 @@ class Blockchain:
             block_index += 1
         return True
 
+    #list blockchain
     def get_blockchain(self):
         return  {
             'length': len(self.chain),
             'blockchain': self.chain
         }
+    
+    #add new transaction
+    def add_transaction(self, sender, receiver, amount):
+        self.transactions.append({
+            'sender':sender,
+            'receiver':receiver,
+            'amount':amount
+        })
+
+        previous_block = self.get_previous_block()
+        return previous_block['index'] + 1
