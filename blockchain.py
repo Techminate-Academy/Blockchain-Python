@@ -1,13 +1,16 @@
 import datetime
 import hashlib
 import json
-from time import time
+import requests
+from uuid import uuid4
+from urllib.parse import urlparse
 
 class Blockchain:
     #constructor
     def __init__(self):
         self.chain = []
         self.transactions = []
+        self.nodes = set()
         #genesis block
         self.genesis_block()
     
@@ -110,3 +113,8 @@ class Blockchain:
 
         previous_block = self.get_previous_block()
         return previous_block['index'] + 1
+
+    #add node in the network
+    def add_node(self, address):
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
