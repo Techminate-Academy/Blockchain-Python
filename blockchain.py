@@ -104,10 +104,10 @@ class Blockchain:
         }
     
     #add new transaction
-    def add_transaction(self, sender, receiver, amount):
+    def add_transaction(self, sender, reciever, amount):
         self.transactions.append({
             'sender':sender,
-            'receiver':receiver,
+            'reciever':reciever,
             'amount':amount
         })
 
