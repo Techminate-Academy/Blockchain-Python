@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from blockchain import Blockchain
 from mineblock import mine_block
 from validation import chain_validation
-
+from transaction import add_transaction
 #instance of FastAPI
 app = FastAPI()
 
@@ -25,6 +25,6 @@ async def list_blockchain():
 async def blockchain_validation():
     return chain_validation(blockchain)
    
-@app.post("/get_chain_validation")
-async def blockchain_validation():
-    return (blockchain)
+@app.post("/add_transaction", status_code=status.HTTP_201_CREATED,)
+async def add_new_transaction(request):
+    return add_transaction(blockchain, request)
