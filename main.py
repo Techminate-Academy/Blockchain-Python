@@ -25,3 +25,6 @@ async def list_blockchain():
 async def blockchain_validation():
     return chain_validation(blockchain)
    
+@app.post("/get_chain_validation")
+async def blockchain_validation():
+    return (blockchain)
