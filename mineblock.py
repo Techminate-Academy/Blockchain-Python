@@ -11,7 +11,7 @@ def mine_block(blockchain):
     pow = blockchain.proof_of_work(previous_proof)
     proof = pow['new_proof']
     previous_hash = previous_block['block_hash']
-    blockchain.add_transaction(sender = node_address, reciever = 'sazid', amount = 1000)
+    blockchain.add_transaction(sender = node_address, reciever = 'sazid', amount = 10)
     timestamp = str(datetime.datetime.now())
     block_hash = blockchain.calculateHash(index, previous_hash, timestamp, proof)
     block = blockchain.create_block(index, proof, previous_hash, block_hash, timestamp)
